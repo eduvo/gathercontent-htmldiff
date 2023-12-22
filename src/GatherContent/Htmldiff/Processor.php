@@ -88,11 +88,11 @@ class Processor implements ProcessorInterface
 
                 if ($leaf == 'start') {
 
-                    $html .= $this->openTag($path);
+                    // $html .= $this->openTag($path);
 
                 } elseif ($leaf == 'end') {
 
-                    $html .= $this->closeTag($path);
+                    // $html .= $this->closeTag($path);
 
                 } else {
 
