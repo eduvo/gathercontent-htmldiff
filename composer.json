@@ -1,5 +1,5 @@
 {
-    "name": "gathercontent/htmldiff",
+    "name": "eduvo/gathercontent-htmldiff",
     "description": "Compare two HTML strings",
     "license": "MIT",
     "authors": [
