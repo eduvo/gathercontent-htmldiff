@@ -7,12 +7,12 @@
 
 namespace GatherContent\Htmldiff;
 
-use \cogpowered\FineDiff\Parser\OpcodeInterface;
-use \cogpowered\FineDiff\Render\Renderer;
+use FineDiff\Parser\OpcodeInterface;
+use FineDiff\Render\Renderer;
 
 class GitDiffRenderer extends Renderer
 {
-    public function callback($opcode, $from, $from_offset, $from_len)
+    public function callback($opcode, $from, $from_offset, $from_len): string
     {
         if ($opcode === 'c') {
 
