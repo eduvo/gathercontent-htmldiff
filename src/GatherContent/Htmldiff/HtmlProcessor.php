@@ -111,6 +111,8 @@ class HtmlProcessor implements ProcessorInterface
                 $prevPath = $path;
                 
                 $this->tagsHistory($prevPath, $leaf, $type);
+            } else {
+                $html .= $this->fixMissingTag($line);
             }
         }
 
@@ -127,11 +129,26 @@ class HtmlProcessor implements ProcessorInterface
     private function tagsHistory($path, $leaf, $type)
     {
         if ($leaf == 'start') {
-            $this->tags[] = htmlspecialchars($this->openTag($path));
+            $this->tags[] = $this->openTag($path);
         }
         if ($leaf == 'end') {
             array_pop($this->tags);
         }
+    }
+
+    /**
+     * Insert missing tag if preg_match was not working.
+     * TODO: Add more tests to find the same for opening tag.
+     *
+     * @return string
+     */
+    private function fixMissingTag(): string
+    {
+        if (end($this->tags) != '<body>') {
+            return $this->closeTag(end($this->tags));
+        }
+
+        return '';
     }
 
     /**
