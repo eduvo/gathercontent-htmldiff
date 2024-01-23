@@ -4,7 +4,7 @@ namespace GatherContent\Htmldiff;
 
 class Processor implements ProcessorInterface
 {
-    public function prepareHtmlInput($html)
+    public function prepareHtmlInput(string $html): string
     {
         $config = array(
             'wrap' => false,
@@ -70,13 +70,9 @@ class Processor implements ProcessorInterface
         return $result;
     }
 
-    public function prepareHtmlOutput($diff)
+    public function prepareHtmlOutput(string $diff): string
     {
         $html = '';
-
-        // $prevType = '';
-        // $prevPath = '';
-        // $openType = '';
 
         $lines = explode("\n", $diff);
 
@@ -90,47 +86,20 @@ class Processor implements ProcessorInterface
                 $path = $lineParts[2];
                 $leaf = $lineParts[3];
 
-                // if ($prevType != $type) {
-
-                //     // If another diff tag started, we need to close previous one
-                //     if ($prevType != '') {
-                //         $html .= $this->endType($prevType);
-                //         $openType = '';
-                //     }
-
-                //     $html .= $this->startType($type);
-
-                //     $prevType = $openType = $type;
-                // }
-
                 if ($leaf == 'start') {
 
-                    // $html .= $this->openTag($path);
+                    $html .= $this->openTag($path);
 
                 } elseif ($leaf == 'end') {
 
-                    // $html .= $this->closeTag($path);
+                    $html .= $this->closeTag($path);
 
                 } else {
 
                     $html .= $this->prepareLeaf($leaf, $type);
-
-                    // $html .= $this->insertLeaf($leaf);
                 }
-
-                // $prevPath = $lineParts[2];
-            // } else {
-
-            //     // Fix missing closing html tags
-            //     $html .= $this->closeTag($prevPath);
             }
         }
-
-        // // We need to close opened diff tag if there is one.
-        // if ($openType != '') {
-
-        //     $html .= $this->endType($openType);
-        // }
 
         $html = $this->cleanup($html);
 
@@ -172,38 +141,6 @@ class Processor implements ProcessorInterface
             return $realLeaf.' ';
 
         }
-    }
-
-    private function startType($type)
-    {
-        if ($type == '+') {
-            return '<ins>';
-        } elseif ($type == '-') {
-            return '<del>';
-        } else {
-            return '';
-        }
-    }
-
-    private function endType($type)
-    {
-        if ($type == '+') {
-            return '</ins>';
-        } elseif ($type == '-') {
-            return '</del>';
-        } else {
-            return '';
-        }
-    }
-
-    /**
-     * Insert leaf without surrounded quotes.
-     */
-    private function insertLeaf($leaf)
-    {
-        $realLeaf = substr($leaf, 1, -1);
-
-        return $realLeaf . ' ';
     }
 
     private function cleanup($html)
