@@ -113,6 +113,7 @@ class HtmlProcessor implements ProcessorInterface
                 $this->tagsHistory($prevPath, $leaf, $type);
             } else {
                 $html .= $this->fixMissingTag($line);
+                array_pop($this->tags);
             }
         }
 
@@ -144,7 +145,7 @@ class HtmlProcessor implements ProcessorInterface
      */
     private function fixMissingTag(): string
     {
-        if (end($this->tags) != '<body>') {
+        if (count($this->tags)) {
             return $this->closeTag(end($this->tags));
         }
 
