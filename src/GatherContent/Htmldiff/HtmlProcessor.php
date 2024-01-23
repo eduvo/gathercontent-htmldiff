@@ -206,7 +206,7 @@ class HtmlProcessor implements ProcessorInterface
 
         preg_match("/<([^\s>]*)/", $openTag, $output);
 
-        $tagName = $output[1];
+        $tagName = end($output);
 
         return '</'.$tagName.'> ';
     }
@@ -230,32 +230,31 @@ class HtmlProcessor implements ProcessorInterface
      * @param string $html
      * @return string
      */
-     private function cleanup(string $html): string
-     {
-         $html = str_replace(' </', '</', $html);
-         $html = str_replace('> <', '><', $html);
- 
-         $html = str_replace(array('</ins><ins>', '</del><del>'), ' ', $html);
-         $html = str_replace(array('<body>', '</body>', '<ins></ins>', '<del></del>'), '', $html);
- 
-         $singletonClosingTags = array(
-             '</area>',
-             '</base>',
-             '</br>',
-             '</col>',
-             '</command>',
-             '</embed>',
-             '</hr>',
-             '</img>',
-             '</input>',
-             '</link>',
-             '</meta>',
-             '</param>',
-             '</source>'
-         );
- 
-         $html = str_replace($singletonClosingTags, '', $html);
- 
-         return trim($html);
-     }
+    private function cleanup(string $html): string
+    {
+        $html = str_replace(' <', '<', $html);
+
+        $html = str_replace(array('</ins><ins>', '</del><del>'), ' ', $html);
+        $html = str_replace(array('<body>', '</body>', '<ins></ins>', '<del></del>'), '', $html);
+
+        $singletonClosingTags = array(
+            '</area>',
+            '</base>',
+            '</br>',
+            '</col>',
+            '</command>',
+            '</embed>',
+            '</hr>',
+            '</img>',
+            '</input>',
+            '</link>',
+            '</meta>',
+            '</param>',
+            '</source>'
+        );
+
+        $html = str_replace($singletonClosingTags, '', $html);
+
+        return trim($html);
+    }
 }
