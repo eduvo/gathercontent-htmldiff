@@ -4,6 +4,8 @@ namespace GatherContent\Htmldiff;
 
 class Processor implements ProcessorInterface
 {
+    private array $openedTags = [];
+
     public function prepareHtmlInput(string $html): string
     {
         $config = array(
@@ -98,6 +100,11 @@ class Processor implements ProcessorInterface
 
                     $html .= $this->prepareLeaf($leaf, $type);
                 }
+
+                $this->tagsHistory($path, $leaf);
+            } else {
+
+                $html .= $this->fixMissingTag($line);
             }
         }
 
@@ -141,6 +148,65 @@ class Processor implements ProcessorInterface
             return $realLeaf.' ';
 
         }
+    }
+
+    private function tagsHistory($path, $leaf)
+    {
+        $openTag = $this->openTag($path);
+
+        if (!$this->isSingletonTag($openTag)) {
+            if ($leaf == 'start') {
+                $this->openedTags[] = $openTag;
+            }
+            if ($leaf == 'end') {
+                array_pop($this->openedTags);
+            }
+        }
+    }
+
+    public function isSingletonTag($tag)
+    {
+        $singletonTags = [
+            '<area',
+            '<base',
+            '<br',
+            '<col',
+            '<command',
+            '<embed',
+            '<hr',
+            '<img',
+            '<input',
+            '<link',
+            '<meta',
+            '<param',
+            '<source',
+        ];
+
+        $isSingletonTag = false;
+
+        foreach ($singletonTags as $singletonTag) {
+            if ($tag && str_contains($tag, $singletonTag)) {
+                $isSingletonTag = true;
+            }
+        }
+
+        return $isSingletonTag;
+    }
+
+    /**
+     * Insert missing tag if preg_match was not working.
+     * TODO: Add more tests to find the same for opening tag.
+     *
+     * @return string
+     */
+    private function fixMissingTag(): string
+    {
+        if (count($this->openedTags)) {
+            $tag = array_pop($this->openedTags);
+            return $this->closeTag($tag);
+        }
+
+        return '';
     }
 
     private function cleanup($html)
