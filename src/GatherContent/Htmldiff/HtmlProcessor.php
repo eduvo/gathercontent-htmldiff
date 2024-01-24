@@ -126,13 +126,12 @@ class HtmlProcessor implements ProcessorInterface
                 }
 
                 $prevType = $type;
-    
-                // // $prevPath = $path;
+                $prevPath = $path;
                 
-                // // $this->tagsHistory($prevPath, $leaf, $type);
+                $this->tagsHistory($prevPath, $leaf, $type);
             } else {
-                // $html .= $this->fixMissingTag($line);
-                // array_pop($this->tags);
+                $html .= $this->fixMissingTag($line);
+                array_pop($this->tags);
             }
         }
 
