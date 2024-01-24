@@ -5,6 +5,7 @@ namespace GatherContent\Htmldiff;
 class HtmlProcessor implements ProcessorInterface
 {
     private array $tags = [];
+    private array $openedTags = [];
 
     /**
      * Parse and prepare a document stored in a string.
@@ -76,7 +77,6 @@ class HtmlProcessor implements ProcessorInterface
     {
         $html = '';
         $prevType = '';
-        $prevPath = '';
         $openType = '';
 
         $lines = explode("\n", $diff);
@@ -89,37 +89,57 @@ class HtmlProcessor implements ProcessorInterface
                 $path = $lineParts[2];  // html string
                 $leaf = $lineParts[3];  // "start" / "end" / content
 
-                // Check if another diff tag started
                 if ($prevType != $type) {
-                    // Check if we need to close previous diff tag
-                    if ($prevType != '') {
+                    if (trim($prevType) != '') {
                         $html .= $this->closeDiffTag($prevType);
-                        $openType = '';
                     }
-    
+
                     $html .= $this->openDiffTag($type);
-    
-                    $prevType = $openType = $type;
+                    $this->openedTags = [];
+                    $openType = $type;
                 }
+
+                if ($leaf == 'start') {
+                    $openTag = $this->openTag($path);
+
+                    $html .= $openTag;
+
+                    if (trim($prevType) != '' && trim($openType) != '') {
+                        $this->openedTags[] = htmlspecialchars($openTag);
+                    }
+                } elseif ($leaf == 'end') {
+                    if (trim($openType) != '' && count($this->openedTags) == 0) {
+                        $html .= $this->closeDiffTag($type);
+                    }
+
+                    $closeTag = $this->closeTag($path);
+
+                    $html .= $closeTag;
+
+                    if (trim($openType) != '' && count($this->openedTags) > 0) {
+                        array_pop($this->openedTags);
+                    } else {
+                        $html .= $this->openDiffTag($type);
+                    }
+                } else {
+                    $html .= $this->insertLeaf($leaf);
+                }
+
+                $prevType = $type;
     
-                $html .= match ($leaf) {
-                    'start' => $this->openTag($path),
-                    'end' => $this->closeTag($path),
-                    default => $this->insertLeaf($leaf)
-                };
-    
-                $prevPath = $path;
+                // // $prevPath = $path;
                 
-                $this->tagsHistory($prevPath, $leaf, $type);
+                // // $this->tagsHistory($prevPath, $leaf, $type);
             } else {
-                $html .= $this->fixMissingTag($line);
-                array_pop($this->tags);
+                // $html .= $this->fixMissingTag($line);
+                // array_pop($this->tags);
             }
         }
 
         // Close opened diff tag if there is one.
-        if ($openType != '') {
+        if (trim($openType) != '') {
             $html .= $this->closeDiffTag($openType);
+            $openType = '';
         }
 
         $html = $this->cleanup($html);
@@ -129,12 +149,45 @@ class HtmlProcessor implements ProcessorInterface
 
     private function tagsHistory($path, $leaf, $type)
     {
-        if ($leaf == 'start') {
-            $this->tags[] = $this->openTag($path);
+        $openTag = $this->openTag($path);
+
+        if (!$this->isSingletonTag($openTag)) {
+            if ($leaf == 'start') {
+                $this->tags[] = $openTag;
+            }
+            if ($leaf == 'end') {
+                array_pop($this->tags);
+            }
         }
-        if ($leaf == 'end') {
-            array_pop($this->tags);
+    }
+
+    public function isSingletonTag($tag)
+    {
+        $singletonTags = [
+            '<area',
+            '<base',
+            '<br',
+            '<col',
+            '<command',
+            '<embed',
+            '<hr',
+            '<img',
+            '<input',
+            '<link',
+            '<meta',
+            '<param',
+            '<source',
+        ];
+
+        $isSingletonTag = false;
+
+        foreach ($singletonTags as $singletonTag) {
+            if ($tag && str_contains($tag, $singletonTag)) {
+                $isSingletonTag = true;
+            }
         }
+
+        return $isSingletonTag;
     }
 
     /**
@@ -220,6 +273,10 @@ class HtmlProcessor implements ProcessorInterface
      */
     private function insertLeaf(string $leaf): string
     {
+        if ($this->isSingletonTag($leaf)) {
+            return '';
+        }
+
         $realLeaf = substr($leaf, 1, -1);
 
         return $realLeaf . ' ';
