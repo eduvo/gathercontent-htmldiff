@@ -24,7 +24,7 @@
     ],
     "require": {
         "ext-tidy": "*",
-        "eduvo/finediff": "dev-master"
+        "eduvo/finediff": "^1.0"
     },
     "require-dev": {
         "phpunit/phpunit": "4.*",
