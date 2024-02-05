@@ -7,8 +7,8 @@
 
 namespace GatherContent\Htmldiff;
 
-use FineDiff\Parser\OpcodeInterface;
-use FineDiff\Render\Renderer;
+use \cogpowered\FineDiff\Parser\OpcodeInterface;
+use \cogpowered\FineDiff\Render\Renderer;
 
 class GitDiffRenderer extends Renderer
 {

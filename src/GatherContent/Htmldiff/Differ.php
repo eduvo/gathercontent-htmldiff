@@ -2,8 +2,8 @@
 
 namespace GatherContent\Htmldiff;
 
-use FineDiff\Diff;
-use FineDiff\Granularity\Paragraph as Granularity;
+use \cogpowered\FineDiff\Diff;
+use \cogpowered\FineDiff\Granularity\Paragraph as Granularity;
 
 class Differ implements DifferInterface
 {
